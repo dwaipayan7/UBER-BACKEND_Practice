@@ -1,6 +1,8 @@
 import userModel from '../model/user.model.js';
 import bcrypt from 'bcrypt';
+import { config } from 'dotenv';
 import jwt from 'jsonwebtoken';
+config();
 
 
 module.exports.register = async(req,res) =>{
@@ -21,9 +23,16 @@ module.exports.register = async(req,res) =>{
             password: hashedPassword
         });
 
-        const token = jwt.sign()
+        await newUser.save();
+
+        const token = jwt.sign({id: user}, process.env.JWT_SECRET);
+
+        res.cookie('token', token);
+
+        res.status(200).json({token: token, user: newUser});
         
     } catch (error) {
         
+        res.send(500).json({message: 'Internal server error'});
     }
 }

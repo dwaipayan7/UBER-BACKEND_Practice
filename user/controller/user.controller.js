@@ -4,10 +4,8 @@ import { config } from 'dotenv';
 import jwt from 'jsonwebtoken';
 config();
 
-
-module.exports.register = async(req,res) =>{
+export const register = async(req, res) => {
     try {
-
         const {name, email, password} = req.body;
         const user = await userModel.findOne({email});
 
@@ -25,14 +23,15 @@ module.exports.register = async(req,res) =>{
 
         await newUser.save();
 
-        const token = jwt.sign({id: user}, process.env.JWT_SECRET);
+        const token = jwt.sign({id: newUser._id}, process.env.JWT_SECRET);
 
+        console.log("Data Saved Successfully");
+        
         res.cookie('token', token);
-
         res.status(200).json({token: token, user: newUser});
         
     } catch (error) {
-        
-        res.send(500).json({message: 'Internal server error'});
+        console.error("Registration error:", error);
+        res.status(500).json({message: 'Internal server error'});
     }
 }
